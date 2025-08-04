@@ -4,6 +4,7 @@ import { getVideo, updateVideo } from "../db/videos";
 import type { ApiConfig } from "../config";
 import type { BunRequest } from "bun";
 import path from "path";
+import crypto from "crypto";
 import { BadRequestError, NotFoundError, UserForbiddenError } from "./errors";
 
 export async function handlerUploadThumbnail(cfg: ApiConfig, req: BunRequest) {
@@ -50,10 +51,11 @@ export async function handlerUploadThumbnail(cfg: ApiConfig, req: BunRequest) {
   }
 
   const ext = type.split("/")[1];
+  const rand = crypto.randomBytes(32).toString("base64url");
 
-  await Bun.write(path.join(cfg.assetsRoot, `${videoId}.${ext}`), arrBuff)
+  await Bun.write(path.join(cfg.assetsRoot, `${rand}.${ext}`), arrBuff);
 
-  const url = `http://localhost:${cfg.port}/assets/${videoId}.${ext}`;
+  const url = `http://localhost:${cfg.port}/assets/${rand}.${ext}`;
   
   video.thumbnailURL = url;
   updateVideo(cfg.db, video);
